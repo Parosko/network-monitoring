@@ -37,7 +37,8 @@ async function monitorDevices() {
          ip: device.ip,
          type: device.type,
          alive: pingResult.alive,
-         time: pingResult.time
+         time: pingResult.time,
+         packetLoss: pingResult.packetLoss
       });
    }
 

@@ -21,6 +21,12 @@ function DeviceCard({ device }) {
          <div className={styles.info}>
             <strong>Latency:</strong> {device.time} ms
          </div>
+         <div className={styles.info}>
+            <strong>Packet Loss:</strong>{' '}
+            <span className={device.packetLoss > 0 ? styles.packetLossWarning : styles.packetLossGood}>
+               {device.packetLoss}%
+            </span>
+         </div>
       </div>
    );
 }

@@ -42,6 +42,18 @@
    font-size: 14px;
 }
 
+.packetLossGood {
+   color: #22c55e;
+   font-weight: bold;
+   font-size: 14px;
+}
+
+.packetLossWarning {
+   color: #f59e0b;
+   font-weight: bold;
+   font-size: 14px;
+}
+
 .info {
    margin: 8px 0;
    font-size: 14px;
