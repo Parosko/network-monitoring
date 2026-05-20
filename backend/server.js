@@ -35,6 +35,7 @@ async function monitorDevices() {
       results.push({
          name: device.name,
          ip: device.ip,
+         type: device.type,
          alive: pingResult.alive,
          time: pingResult.time
       });

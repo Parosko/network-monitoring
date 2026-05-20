@@ -4,6 +4,11 @@ function DeviceCard({ device }) {
    return (
       <div className={styles.card}>
          <div className={styles.deviceName}>{device.name}</div>
+         {device.type && (
+            <div className={styles.type}>
+               <strong>Type:</strong> {device.type}
+            </div>
+         )}
          <div className={styles.info}>
             <strong>IP:</strong> {device.ip}
          </div>
