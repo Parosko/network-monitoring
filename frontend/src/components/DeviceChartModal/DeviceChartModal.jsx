@@ -8,6 +8,7 @@ import {
    Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { IconClose } from '../Icons/Icons';
 import styles from './DeviceChartModal.module.css';
 
 ChartJS.register(
@@ -32,10 +33,10 @@ function DeviceChartModal({ device, onClose }) {
             label: 'Latency (ms)',
             data: history,
             borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.08)',
+            backgroundColor: 'rgba(37, 99, 235, 0.06)',
             borderWidth: 2,
-            pointRadius: history.length > 30 ? 0 : 3,
-            tension: 0.2,
+            pointRadius: history.length > 30 ? 0 : 2,
+            tension: 0.15,
             fill: true,
          },
       ],
@@ -55,13 +56,15 @@ function DeviceChartModal({ device, onClose }) {
       },
       scales: {
          x: {
-            title: { display: true, text: 'Sample (oldest → newest)' },
-            grid: { color: '#e5e7eb' },
+            title: { display: true, text: 'Sample (oldest → newest)', font: { family: 'Poppins' } },
+            grid: { color: '#f4f4f5' },
+            ticks: { font: { family: 'Poppins', size: 11 } },
          },
          y: {
-            title: { display: true, text: 'ms' },
+            title: { display: true, text: 'ms', font: { family: 'Poppins' } },
             beginAtZero: true,
-            grid: { color: '#e5e7eb' },
+            grid: { color: '#f4f4f5' },
+            ticks: { font: { family: 'Poppins', size: 11 } },
          },
       },
    };
@@ -76,24 +79,24 @@ function DeviceChartModal({ device, onClose }) {
             <div className={styles.header}>
                <div>
                   <h2 id="chart-modal-title" className={styles.title}>{device.name}</h2>
-                  <p className={styles.subtitle}>{device.ip} · Latency over recent pings</p>
+                  <p className={styles.subtitle}>{device.ip}</p>
                </div>
                <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
-                  ×
+                  <IconClose />
                </button>
             </div>
 
             <div className={styles.summary}>
-               <span>Current: <strong>{device.time} ms</strong></span>
-               <span>Avg: <strong>{device.avgLatency || 0} ms</strong></span>
-               <span>Min: <strong>{device.minLatency || 0} ms</strong></span>
-               <span>Max: <strong>{device.maxLatency || 0} ms</strong></span>
-               <span>Samples: <strong>{history.length}</strong></span>
+               <span>Current <strong>{device.time} ms</strong></span>
+               <span>Avg <strong>{device.avgLatency || 0} ms</strong></span>
+               <span>Min <strong>{device.minLatency || 0} ms</strong></span>
+               <span>Max <strong>{device.maxLatency || 0} ms</strong></span>
+               <span>Samples <strong>{history.length}</strong></span>
             </div>
 
             <div className={styles.chartWrap}>
                {history.length === 0 ? (
-                  <p className={styles.empty}>No latency data yet. Wait for a few successful pings.</p>
+                  <p className={styles.empty}>No latency data yet.</p>
                ) : (
                   <Line data={chartData} options={chartOptions} />
                )}

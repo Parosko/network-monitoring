@@ -25,38 +25,46 @@ function Dashboard() {
    }, [selectedIp]);
 
    if (loading && devices.length === 0) {
-      return <Loading />;
+      return (
+         <div className={styles.page}>
+            <Loading />
+         </div>
+      );
    }
 
    return (
-      <div className={styles.container}>
-         <h1 className={styles.title}>Network Monitoring Dashboard</h1>
+      <div className={styles.page}>
+         <div className={styles.container}>
+            <header className={styles.header}>
+               <h1 className={styles.title}>Network monitor</h1>
+               <p className={styles.subtitle}>
+                  {devices.length} device{devices.length !== 1 ? 's' : ''}
+                  {lastUpdate ? ` · Last sync ${lastUpdate}` : ''}
+               </p>
+            </header>
 
-         {error && <ErrorMessage message={error} />}
+            {error && <ErrorMessage message={error} />}
 
-         {devices.length === 0 ? (
-            <div className={styles.noDevices}>No devices to monitor</div>
-         ) : (
-            <div className={styles.grid}>
-               {devices.map((device) => (
-                  <DeviceCard
-                     key={device.ip}
-                     device={device}
-                     onSelect={(d) => setSelectedIp(d.ip)}
-                  />
-               ))}
-            </div>
-         )}
+            {devices.length === 0 ? (
+               <div className={styles.noDevices}>No devices to monitor</div>
+            ) : (
+               <div className={styles.grid}>
+                  {devices.map((device) => (
+                     <DeviceCard
+                        key={device.ip}
+                        device={device}
+                        onSelect={(d) => setSelectedIp(d.ip)}
+                     />
+                  ))}
+               </div>
+            )}
 
-         {selectedDevice && (
-            <DeviceChartModal
-               device={selectedDevice}
-               onClose={() => setSelectedIp(null)}
-            />
-         )}
-
-         <div className={styles.statusBar}>
-            {lastUpdate && `Last updated: ${lastUpdate}`}
+            {selectedDevice && (
+               <DeviceChartModal
+                  device={selectedDevice}
+                  onClose={() => setSelectedIp(null)}
+               />
+            )}
          </div>
       </div>
    );

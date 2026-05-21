@@ -1,46 +1,36 @@
+import { IconActivity, IconBarChart, IconDot, IconInfo } from '../Icons/Icons';
 import styles from './DeviceCard.module.css';
 
 function StatItem({ label, value, unit, tooltip, hasData = true }) {
-   const displayValue = hasData ? value : '-';
-   
+   const displayValue = hasData ? value : '—';
+
    return (
       <div className={styles.statItem}>
-         <div className={styles.statLabel} title={tooltip}>
+         <span className={styles.statLabel} title={tooltip}>
             {label}
-            <span className={styles.infoIcon}>ℹ️</span>
-         </div>
-         <div className={`${styles.statValue} ${!hasData ? styles.noData : ''}`}>
+            {tooltip && <IconInfo className={styles.infoIcon} />}
+         </span>
+         <span className={`${styles.statValue} ${!hasData ? styles.noData : ''}`}>
             {displayValue}
             {unit && hasData && <span className={styles.unit}>{unit}</span>}
-         </div>
+         </span>
       </div>
    );
 }
 
-function getStatusColor(device) {
-   if (!device.alive) return 'critical';
-   if (device.time > 100) return 'slow';
-   if (device.successRate < 80) return 'warning';
-   return 'healthy';
-}
-
-function getLatencyColor(latency) {
-   if (latency > 100) return styles.latencySlow;
-   if (latency > 50) return styles.latencyWarning;
-   return styles.latencyGood;
-}
-
-function getSuccessRateColor(rate) {
-   if (rate >= 95) return styles.rateExcellent;
-   if (rate >= 80) return styles.rateGood;
-   return styles.rateWarning;
+function StatusBadge({ alive }) {
+   return (
+      <span className={styles.statusBadge}>
+         <IconDot className={`${styles.statusDot} ${alive ? styles.dotOnline : styles.dotOffline}`} />
+         {alive ? 'Online' : 'Offline'}
+      </span>
+   );
 }
 
 function DeviceCard({ device, onSelect }) {
-   const statusColor = getStatusColor(device);
-   const lastUpdateTime = device.lastCheckedTime 
+   const lastUpdateTime = device.lastCheckedTime
       ? new Date(device.lastCheckedTime).toLocaleTimeString()
-      : 'N/A';
+      : '—';
 
    const hasStableMetrics = device.sampleCount >= 3;
    const hasAnyMetrics = device.sampleCount > 0;
@@ -54,156 +44,104 @@ function DeviceCard({ device, onSelect }) {
 
    return (
       <div
-         className={`${styles.card} ${styles[`status_${statusColor}`]} ${onSelect ? styles.clickable : ''}`}
+         className={`${styles.card} ${onSelect ? styles.clickable : ''}`}
          onClick={() => onSelect?.(device)}
          onKeyDown={handleKeyDown}
          role={onSelect ? 'button' : undefined}
          tabIndex={onSelect ? 0 : undefined}
-         title={onSelect ? 'Click to view latency chart' : undefined}
       >
-         {/* Header */}
          <div className={styles.header}>
             <h2 className={styles.deviceName}>{device.name}</h2>
             <div className={styles.headerRight}>
                {device.isMonitoring && (
-                  <span className={styles.monitoringIndicator} title="System is actively monitoring this device">
-                     🟡 Monitoring
+                  <span className={styles.tag} title="Actively monitored">
+                     <IconActivity className={styles.tagIcon} />
+                     Live
                   </span>
                )}
-               <span className={`${styles.statusBadge} ${device.alive ? styles.online : styles.offline}`}>
-                  {device.alive ? '🟢 Online' : '🔴 Offline'}
-               </span>
+               <StatusBadge alive={device.alive} />
             </div>
          </div>
 
-         {/* Device Info */}
-         <div className={styles.basicInfo}>
-            <StatItem 
-               label="IP Address" 
-               value={device.ip}
-               tooltip="The IP address of the device being monitored"
-            />
-            {device.type && (
-               <StatItem 
-                  label="Device Type" 
-                  value={device.type}
-                  tooltip="Category or type of the device"
-               />
-            )}
+         <div className={styles.meta}>
+            <StatItem label="IP address" value={device.ip} />
+            {device.type && <StatItem label="Type" value={device.type} />}
          </div>
 
-         {/* Data Collection Status */}
          {device.totalChecks > 0 && device.sampleCount < 3 && (
-            <div className={styles.statusMessage}>
-               📊 Collecting data... ({device.sampleCount} of 3 samples, {device.totalChecks} total checks)
+            <div className={styles.notice}>
+               <IconBarChart className={styles.noticeIcon} />
+               <span>
+                  Collecting samples ({device.sampleCount}/3, {device.totalChecks} checks so far)
+               </span>
             </div>
          )}
 
-         {/* Latency Stats Grid */}
-         <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Latency Statistics</h3>
+         <div className={styles.block}>
+            <h3 className={styles.blockTitle}>Latency</h3>
             <div className={styles.statsGrid}>
-               <StatItem 
-                  label="Current"
-                  value={device.time}
-                  unit="ms"
-                  tooltip="The latency of the most recent ping (in milliseconds)"
-               />
-               <StatItem 
+               <StatItem label="Current" value={device.time} unit="ms" tooltip="Latest ping" />
+               <StatItem
                   label="Average"
                   value={device.avgLatency || 0}
                   unit="ms"
-                  tooltip="Average latency calculated from recent measurements"
+                  tooltip="Mean of recent samples"
                   hasData={hasAnyMetrics}
                />
-               <StatItem 
+               <StatItem
                   label="Min"
                   value={device.minLatency || 0}
                   unit="ms"
-                  tooltip="Lowest latency recorded in recent measurements"
                   hasData={hasStableMetrics}
                />
-               <StatItem 
+               <StatItem
                   label="Max"
                   value={device.maxLatency || 0}
                   unit="ms"
-                  tooltip="Highest latency recorded in recent measurements"
                   hasData={hasStableMetrics}
                />
             </div>
             {!hasStableMetrics && device.totalChecks > 0 && (
-               <small className={styles.metricNote}>
-                  Min/Max will stabilize after 3+ measurements
-               </small>
+               <span className={styles.hint}>Min and max appear after 3 samples.</span>
             )}
          </div>
 
-         {/* Quality Metrics */}
-         <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Quality Metrics</h3>
-            <div className={styles.qualityMetrics}>
-               <div className={styles.metricRow}>
-                  <StatItem 
-                     label="Success Rate"
-                     value={device.successRate || 0}
-                     unit="%"
-                     tooltip="Percentage of successful ping responses out of total attempts"
-                  />
-                  <div className={styles.successRateBar}>
-                     <div 
-                        className={styles.successRateFill}
-                        style={{ width: `${device.successRate || 0}%` }}
-                     ></div>
-                  </div>
-               </div>
-               <StatItem 
-                  label="Packet Loss"
-                  value={device.packetLoss || 0}
+         <div className={styles.block}>
+            <h3 className={styles.blockTitle}>Quality</h3>
+            <div className={styles.qualityRow}>
+               <StatItem
+                  label="Success rate"
+                  value={device.successRate || 0}
                   unit="%"
-                  tooltip="Percentage of packets lost during transmission"
+                  tooltip="Successful pings / total checks"
                />
+               <div className={styles.progressTrack} aria-hidden>
+                  <div
+                     className={styles.progressFill}
+                     style={{ width: `${device.successRate || 0}%` }}
+                  />
+               </div>
             </div>
+            <StatItem label="Packet loss" value={device.packetLoss || 0} unit="%" />
          </div>
 
-         {/* Connection Info - Always Show */}
-         <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Connection Info</h3>
-            <div className={styles.connectionInfo}>
-               <StatItem 
-                  label="Consecutive Responses"
-                  value={device.consecutiveResponses || 0}
-                  tooltip="Number of consecutive successful ping responses (resets if device goes offline)"
-               />
-               <StatItem 
-                  label="Total Checks"
-                  value={device.totalChecks || 0}
-                  tooltip="Total number of ping attempts since monitoring started"
-               />
+         <div className={styles.block}>
+            <h3 className={styles.blockTitle}>Connection</h3>
+            <div className={styles.connectionGrid}>
+               <StatItem label="Consecutive" value={device.consecutiveResponses || 0} />
+               <StatItem label="Total checks" value={device.totalChecks || 0} />
                {device.sampleCount > 0 && (
-                  <StatItem 
-                     label="Data Samples"
-                     value={device.sampleCount || 0}
-                     tooltip="Number of successful latency measurements collected (max 100)"
-                  />
+                  <StatItem label="Samples" value={device.sampleCount || 0} />
                )}
                {device.successCount !== undefined && (
-                  <StatItem 
-                     label="Successful Pings"
-                     value={device.successCount || 0}
-                     tooltip="Total number of successful ping responses"
-                  />
+                  <StatItem label="Successful" value={device.successCount || 0} />
                )}
             </div>
          </div>
 
-         {/* Footer */}
          <div className={styles.footer}>
-            <small>Last updated: {lastUpdateTime}</small>
-            {device.isMonitoring && (
-               <small className={styles.monitoringNote}>
-                  Pinging every 5 seconds automatically
-               </small>
-            )}
+            <span>Updated {lastUpdateTime}</span>
+            {onSelect && <span className={styles.viewChart}>Click card for chart</span>}
          </div>
       </div>
    );

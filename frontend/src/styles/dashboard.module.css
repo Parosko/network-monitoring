@@ -1,49 +1,60 @@
+.page {
+   min-height: 100vh;
+   padding: 24px 20px 32px;
+}
+
 .container {
-   padding: 20px;
-   font-family: Arial, sans-serif;
-   max-width: 1000px;
+   max-width: 1200px;
    margin: 0 auto;
 }
 
+.header {
+   margin-bottom: 24px;
+}
+
 .title {
-   text-align: center;
-   color: #333;
-   margin-bottom: 30px;
+   font-size: 1.5rem;
+   font-weight: 600;
+   margin: 0 0 4px;
+   color: var(--color-text);
+}
+
+.subtitle {
+   font-size: 0.875rem;
+   color: var(--color-muted);
+   margin: 0;
 }
 
 .grid {
    display: grid;
-   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-   gap: 20px;
+   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+   gap: 16px;
 }
 
-.loading {
+.loading,
+.noDevices {
    text-align: center;
-   padding: 40px;
-   font-size: 16px;
-   color: #999;
+   padding: 48px 20px;
+   color: var(--color-muted);
+   font-size: 0.9375rem;
 }
 
 .error {
-   text-align: center;
-   padding: 20px;
-   background-color: #fee;
-   color: #c33;
-   border-radius: 4px;
-   margin-bottom: 20px;
-}
-
-.noDevices {
-   text-align: center;
-   padding: 40px;
-   color: #999;
+   padding: 12px 16px;
+   margin-bottom: 16px;
+   background: #fef2f2;
+   border: 1px solid #fecaca;
+   border-radius: 6px;
+   color: #991b1b;
+   font-size: 0.875rem;
+   text-align: left;
 }
 
 .statusBar {
-   font-size: 12px;
-   color: #999;
-   margin-top: 20px;
+   margin-top: 24px;
+   padding-top: 16px;
+   border-top: 1px solid var(--color-border);
+   font-size: 0.8125rem;
+   color: var(--color-muted);
    text-align: center;
-   border-top: 1px solid #ddd;
-   padding-top: 10px;
 }

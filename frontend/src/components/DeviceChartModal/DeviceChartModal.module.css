@@ -1,7 +1,7 @@
 .backdrop {
    position: fixed;
    inset: 0;
-   background: rgba(0, 0, 0, 0.45);
+   background: rgba(24, 24, 27, 0.4);
    display: flex;
    align-items: center;
    justify-content: center;
@@ -10,13 +10,14 @@
 }
 
 .modal {
-   background: #fff;
+   background: var(--color-surface);
+   border: 1px solid var(--color-border);
    border-radius: 8px;
    width: 100%;
-   max-width: 720px;
+   max-width: 640px;
    max-height: 90vh;
    overflow: auto;
-   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .header {
@@ -24,86 +25,69 @@
    justify-content: space-between;
    align-items: flex-start;
    padding: 16px 20px;
-   border-bottom: 1px solid #e5e7eb;
+   border-bottom: 1px solid var(--color-border);
 }
 
 .title {
    margin: 0;
-   font-size: 1.25rem;
-   color: #111827;
+   font-size: 1.125rem;
+   font-weight: 600;
 }
 
 .subtitle {
-   margin: 4px 0 0;
-   font-size: 0.875rem;
-   color: #6b7280;
+   margin: 2px 0 0;
+   font-size: 0.8125rem;
+   color: var(--color-muted);
 }
 
 .closeBtn {
-   border: none;
-   background: transparent;
-   font-size: 1.5rem;
-   line-height: 1;
-   color: #6b7280;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 32px;
+   height: 32px;
+   border: 1px solid var(--color-border);
+   border-radius: 6px;
+   background: var(--color-surface);
+   color: var(--color-muted);
    cursor: pointer;
-   padding: 4px 8px;
+   padding: 0;
 }
 
 .closeBtn:hover {
-   color: #111827;
+   color: var(--color-text);
+   background: #fafafa;
+}
+
+.closeBtn svg {
+   width: 16px;
+   height: 16px;
 }
 
 .summary {
    display: flex;
    flex-wrap: wrap;
-   gap: 12px 20px;
+   gap: 8px 16px;
    padding: 12px 20px;
-   font-size: 0.875rem;
-   color: #4b5563;
-   border-bottom: 1px solid #f3f4f6;
+   font-size: 0.8125rem;
+   color: var(--color-muted);
+   border-bottom: 1px solid var(--color-border);
+}
+
+.summary strong {
+   color: var(--color-text);
+   font-weight: 600;
 }
 
 .chartWrap {
-   height: 320px;
+   height: 300px;
    padding: 16px 20px 20px;
 }
 
 .empty {
    margin: 0;
-   padding: 48px 16px;
+   padding: 40px 16px;
    text-align: center;
-   color: #6b7280;
-   font-size: 0.9rem;
-}
-
-@media (prefers-color-scheme: dark) {
-   .modal {
-      background: #1f2937;
-   }
-
-   .header {
-      border-bottom-color: #374151;
-   }
-
-   .title {
-      color: #f9fafb;
-   }
-
-   .subtitle,
-   .summary,
-   .empty {
-      color: #9ca3af;
-   }
-
-   .closeBtn {
-      color: #9ca3af;
-   }
-
-   .closeBtn:hover {
-      color: #f9fafb;
-   }
-
-   .summary {
-      border-bottom-color: #374151;
-   }
+   color: var(--color-muted);
+   font-size: 0.875rem;
 }
