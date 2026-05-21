@@ -36,21 +36,31 @@ function getSuccessRateColor(rate) {
    return styles.rateWarning;
 }
 
-function DeviceCard({ device }) {
+function DeviceCard({ device, onSelect }) {
    const statusColor = getStatusColor(device);
    const lastUpdateTime = device.lastCheckedTime 
       ? new Date(device.lastCheckedTime).toLocaleTimeString()
       : 'N/A';
 
-   // Determine if we have enough samples for stable metrics
    const hasStableMetrics = device.sampleCount >= 3;
    const hasAnyMetrics = device.sampleCount > 0;
 
-   // Debug log
-   console.log(`[${device.name}] totalChecks: ${device.totalChecks}, sampleCount: ${device.sampleCount}, successRate: ${device.successRate}%, consecutive: ${device.consecutiveResponses}`);
+   const handleKeyDown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+         e.preventDefault();
+         onSelect?.(device);
+      }
+   };
 
    return (
-      <div className={`${styles.card} ${styles[`status_${statusColor}`]}`}>
+      <div
+         className={`${styles.card} ${styles[`status_${statusColor}`]} ${onSelect ? styles.clickable : ''}`}
+         onClick={() => onSelect?.(device)}
+         onKeyDown={handleKeyDown}
+         role={onSelect ? 'button' : undefined}
+         tabIndex={onSelect ? 0 : undefined}
+         title={onSelect ? 'Click to view latency chart' : undefined}
+      >
          {/* Header */}
          <div className={styles.header}>
             <h2 className={styles.deviceName}>{device.name}</h2>

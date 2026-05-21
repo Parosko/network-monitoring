@@ -102,6 +102,7 @@ async function monitorDevices() {
             totalChecks: metrics.totalChecks,
             lastCheckedTime: metrics.lastCheckedTime,
             sampleCount: metrics.latencySamples.length,
+            latencyHistory: [...metrics.latencySamples],
             successCount: metrics.successCount,
             isMonitoring: true
          });
@@ -127,6 +128,7 @@ async function monitorDevices() {
             totalChecks: metrics.totalChecks,
             lastCheckedTime: metrics.lastCheckedTime,
             sampleCount: metrics.latencySamples.length,
+            latencyHistory: [...metrics.latencySamples],
             successCount: metrics.successCount,
             isMonitoring: true
          });

@@ -12,6 +12,15 @@
    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
+.clickable {
+   cursor: pointer;
+}
+
+.clickable:focus-visible {
+   outline: 2px solid #2563eb;
+   outline-offset: 2px;
+}
+
 /* Health-based border colors */
 .status_healthy {
    border-left-color: #22c55e;
