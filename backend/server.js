@@ -5,6 +5,9 @@ const db = require('./db');
 const app = express();
 let monitoringResults = [];
 
+// Device metrics tracking
+const deviceMetrics = {};
+
 // Enable CORS for frontend requests
 app.use((req, res, next) => {
    res.header('Access-Control-Allow-Origin', '*');
@@ -22,6 +25,40 @@ async function getDevices() {
    return rows;
 }
 
+function initializeMetrics(deviceIp) {
+   if (!deviceMetrics[deviceIp]) {
+      deviceMetrics[deviceIp] = {
+         latencySamples: [],
+         successCount: 0,
+         totalChecks: 0,
+         consecutiveResponses: 0,
+         lastCheckedTime: null
+      };
+   }
+}
+
+function calculateMetrics(deviceIp) {
+   const metrics = deviceMetrics[deviceIp];
+   if (!metrics || metrics.latencySamples.length === 0) {
+      return {
+         avgLatency: 0,
+         minLatency: 0,
+         maxLatency: 0,
+         successRate: 0
+      };
+   }
+
+   const samples = metrics.latencySamples;
+   const avgLatency = Math.round(samples.reduce((a, b) => a + b, 0) / samples.length);
+   const minLatency = Math.min(...samples);
+   const maxLatency = Math.max(...samples);
+   const successRate = metrics.totalChecks > 0 
+      ? Math.round((metrics.successCount / metrics.totalChecks) * 100) 
+      : 0;
+
+   return { avgLatency, minLatency, maxLatency, successRate };
+}
+
 async function monitorDevices() {
 
    const devices = await getDevices();
@@ -29,8 +66,28 @@ async function monitorDevices() {
    const results = [];
 
    for (const device of devices) {
+      initializeMetrics(device.ip);
+      const metrics = deviceMetrics[device.ip];
 
       const pingResult = await ping.promise.probe(device.ip);
+
+      // Update metrics
+      metrics.totalChecks++;
+      metrics.lastCheckedTime = new Date();
+
+      if (pingResult.alive) {
+         metrics.successCount++;
+         metrics.consecutiveResponses++;
+         // Keep only last 100 samples
+         if (metrics.latencySamples.length >= 100) {
+            metrics.latencySamples.shift();
+         }
+         metrics.latencySamples.push(pingResult.time);
+      } else {
+         metrics.consecutiveResponses = 0;
+      }
+
+      const calculatedMetrics = calculateMetrics(device.ip);
 
       results.push({
          name: device.name,
@@ -38,7 +95,11 @@ async function monitorDevices() {
          type: device.type,
          alive: pingResult.alive,
          time: pingResult.time,
-         packetLoss: pingResult.packetLoss
+         packetLoss: pingResult.packetLoss,
+         ...calculatedMetrics,
+         consecutiveResponses: metrics.consecutiveResponses,
+         totalChecks: metrics.totalChecks,
+         lastCheckedTime: metrics.lastCheckedTime
       });
    }
 

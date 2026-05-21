@@ -1,61 +1,329 @@
 .card {
-   border: 1px solid #ddd;
+   border-left: 5px solid #ddd;
    border-radius: 8px;
    padding: 20px;
-   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-   background-color: #f9f9f9;
-   transition: transform 0.2s, box-shadow 0.2s;
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
+   transition: all 0.3s ease;
 }
 
 .card:hover {
-   transform: translateY(-2px);
-   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+   transform: translateY(-4px);
+   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Health-based border colors */
+.status_healthy {
+   border-left-color: #22c55e;
+   background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.status_healthy:hover {
+   background: linear-gradient(135deg, #e0fce8 0%, #f9fdf7 100%);
+}
+
+.status_warning {
+   border-left-color: #eab308;
+   background: linear-gradient(135deg, #fefce8 0%, #ffffff 100%);
+}
+
+.status_warning:hover {
+   background: linear-gradient(135deg, #fef3c7 0%, #f9fdf7 100%);
+}
+
+.status_slow {
+   border-left-color: #3b82f6;
+   background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+}
+
+.status_slow:hover {
+   background: linear-gradient(135deg, #dbeafe 0%, #f9fdf7 100%);
+}
+
+.status_critical {
+   border-left-color: #ef4444;
+   background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+}
+
+.status_critical:hover {
+   background: linear-gradient(135deg, #fee2e2 0%, #f9fdf7 100%);
+}
+
+/* Header */
+.header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 16px;
+   padding-bottom: 12px;
+   border-bottom: 2px solid #e5e7eb;
 }
 
 .deviceName {
-   font-size: 18px;
+   font-size: 20px;
    font-weight: bold;
-   margin-bottom: 10px;
-   color: #333;
+   color: #1f2937;
+   margin: 0;
 }
 
-.type {
+.statusBadge {
    display: inline-block;
-   background-color: #e0f2fe;
-   color: #0369a1;
-   padding: 4px 8px;
-   border-radius: 4px;
+   padding: 6px 12px;
+   border-radius: 20px;
+   font-size: 13px;
+   font-weight: 600;
+   white-space: nowrap;
+}
+
+.statusBadge.online {
+   background-color: #dcfce7;
+   color: #166534;
+}
+
+.statusBadge.offline {
+   background-color: #fee2e2;
+   color: #991b1b;
+}
+
+/* Basic Info */
+.basicInfo {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 12px;
+   margin-bottom: 16px;
+}
+
+/* Sections */
+.section {
+   margin-bottom: 16px;
+   padding: 12px;
+   background-color: rgba(255, 255, 255, 0.5);
+   border-radius: 6px;
+   border: 1px solid #e5e7eb;
+}
+
+.sectionTitle {
+   font-size: 13px;
+   font-weight: 700;
+   color: #6b7280;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+   margin: 0 0 12px 0;
+   padding: 0;
+}
+
+/* Stats Grid */
+.statsGrid {
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   gap: 12px;
+}
+
+/* Stat Item */
+.statItem {
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
+}
+
+.statLabel {
+   display: flex;
+   align-items: center;
+   gap: 6px;
    font-size: 12px;
    font-weight: 600;
-   margin-bottom: 12px;
+   color: #6b7280;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+   position: relative;
+   cursor: help;
 }
 
-.statusOnline {
+.infoIcon {
+   font-size: 14px;
+   opacity: 0.6;
+   transition: opacity 0.2s;
+}
+
+.statLabel:hover .infoIcon {
+   opacity: 1;
+}
+
+/* Tooltip on hover */
+.statLabel[title] {
+   position: relative;
+}
+
+.statLabel[title]:hover::after {
+   content: attr(title);
+   position: absolute;
+   bottom: 125%;
+   left: 0;
+   background-color: #1f2937;
+   color: #ffffff;
+   padding: 8px 12px;
+   border-radius: 6px;
+   font-size: 12px;
+   font-weight: 400;
+   white-space: nowrap;
+   z-index: 1000;
+   text-transform: none;
+   letter-spacing: normal;
+   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+   pointer-events: none;
+}
+
+.statLabel[title]:hover::before {
+   content: '';
+   position: absolute;
+   bottom: 115%;
+   left: 0;
+   width: 0;
+   height: 0;
+   border-left: 5px solid transparent;
+   border-right: 5px solid transparent;
+   border-top: 5px solid #1f2937;
+   z-index: 1000;
+   pointer-events: none;
+}
+
+.statValue {
+   font-size: 18px;
+   font-weight: bold;
+   color: #1f2937;
+   display: flex;
+   align-items: baseline;
+   gap: 4px;
+}
+
+.unit {
+   font-size: 12px;
+   color: #9ca3af;
+   font-weight: 600;
+}
+
+/* Latency color classes */
+.latencyGood {
    color: #22c55e;
-   font-weight: bold;
-   font-size: 14px;
 }
 
-.statusOffline {
-   color: #ef4444;
-   font-weight: bold;
-   font-size: 14px;
-}
-
-.packetLossGood {
-   color: #22c55e;
-   font-weight: bold;
-   font-size: 14px;
-}
-
-.packetLossWarning {
+.latencyWarning {
    color: #f59e0b;
-   font-weight: bold;
-   font-size: 14px;
 }
 
-.info {
-   margin: 8px 0;
-   font-size: 14px;
-   color: #666;
+.latencySlow {
+   color: #ef4444;
+}
+
+/* Quality Metrics */
+.qualityMetrics {
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+}
+
+.metricRow {
+   display: flex;
+   align-items: flex-end;
+   gap: 12px;
+}
+
+.metricRow .statItem {
+   flex: 0 0 auto;
+   min-width: 100px;
+}
+
+.successRateBar {
+   flex: 1;
+   height: 24px;
+   background-color: #e5e7eb;
+   border-radius: 4px;
+   overflow: hidden;
+   border: 1px solid #d1d5db;
+}
+
+.successRateFill {
+   height: 100%;
+   background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+   transition: width 0.3s ease;
+   display: flex;
+   align-items: center;
+   justify-content: flex-end;
+   padding-right: 8px;
+   color: white;
+   font-size: 11px;
+   font-weight: bold;
+}
+
+.successRateBar:hover .successRateFill {
+   background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+}
+
+/* Success rate color classes */
+.rateExcellent .statValue {
+   color: #22c55e;
+}
+
+.rateGood .statValue {
+   color: #f59e0b;
+}
+
+.rateWarning .statValue {
+   color: #ef4444;
+}
+
+/* Connection Info */
+.connectionInfo {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 12px;
+}
+
+/* Footer */
+.footer {
+   margin-top: 16px;
+   padding-top: 12px;
+   border-top: 1px solid #e5e7eb;
+   text-align: center;
+   font-size: 12px;
+   color: #9ca3af;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+   .basicInfo {
+      grid-template-columns: 1fr;
+   }
+
+   .statsGrid {
+      grid-template-columns: 1fr;
+   }
+
+   .connectionInfo {
+      grid-template-columns: 1fr;
+   }
+
+   .metricRow {
+      flex-direction: column;
+   }
+
+   .metricRow .statItem {
+      min-width: auto;
+   }
+
+   .successRateBar {
+      width: 100%;
+   }
+
+   .statLabel[title]:hover::after {
+      white-space: normal;
+      max-width: 200px;
+      bottom: auto;
+      top: 125%;
+   }
+
+   .statLabel[title]:hover::before {
+      bottom: auto;
+      top: 115%;
+   }
 }

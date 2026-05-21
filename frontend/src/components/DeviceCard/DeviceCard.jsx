@@ -1,31 +1,151 @@
 import styles from './DeviceCard.module.css';
 
-function DeviceCard({ device }) {
+function StatItem({ label, value, unit, tooltip }) {
    return (
-      <div className={styles.card}>
-         <div className={styles.deviceName}>{device.name}</div>
-         {device.type && (
-            <div className={styles.type}>
-               <strong>Type:</strong> {device.type}
-            </div>
-         )}
-         <div className={styles.info}>
-            <strong>IP:</strong> {device.ip}
+      <div className={styles.statItem}>
+         <div className={styles.statLabel} title={tooltip}>
+            {label}
+            <span className={styles.infoIcon}>ℹ️</span>
          </div>
-         <div className={styles.info}>
-            <strong>Status:</strong>{' '}
-            <span className={device.alive ? styles.statusOnline : styles.statusOffline}>
+         <div className={styles.statValue}>
+            {value}
+            {unit && <span className={styles.unit}>{unit}</span>}
+         </div>
+      </div>
+   );
+}
+
+function getStatusColor(device) {
+   if (!device.alive) return 'critical';
+   if (device.time > 100) return 'slow';
+   if (device.successRate < 80) return 'warning';
+   return 'healthy';
+}
+
+function getLatencyColor(latency) {
+   if (latency > 100) return styles.latencySlow;
+   if (latency > 50) return styles.latencyWarning;
+   return styles.latencyGood;
+}
+
+function getSuccessRateColor(rate) {
+   if (rate >= 95) return styles.rateExcellent;
+   if (rate >= 80) return styles.rateGood;
+   return styles.rateWarning;
+}
+
+function DeviceCard({ device }) {
+   const statusColor = getStatusColor(device);
+   const lastUpdateTime = device.lastCheckedTime 
+      ? new Date(device.lastCheckedTime).toLocaleTimeString()
+      : 'N/A';
+
+   return (
+      <div className={`${styles.card} ${styles[`status_${statusColor}`]}`}>
+         {/* Header */}
+         <div className={styles.header}>
+            <h2 className={styles.deviceName}>{device.name}</h2>
+            <span className={`${styles.statusBadge} ${device.alive ? styles.online : styles.offline}`}>
                {device.alive ? '🟢 Online' : '🔴 Offline'}
             </span>
          </div>
-         <div className={styles.info}>
-            <strong>Latency:</strong> {device.time} ms
+
+         {/* Device Info */}
+         <div className={styles.basicInfo}>
+            <StatItem 
+               label="IP Address" 
+               value={device.ip}
+               tooltip="The IP address of the device being monitored"
+            />
+            {device.type && (
+               <StatItem 
+                  label="Device Type" 
+                  value={device.type}
+                  tooltip="Category or type of the device"
+               />
+            )}
          </div>
-         <div className={styles.info}>
-            <strong>Packet Loss:</strong>{' '}
-            <span className={device.packetLoss > 0 ? styles.packetLossWarning : styles.packetLossGood}>
-               {device.packetLoss}%
-            </span>
+
+         {/* Latency Stats Grid */}
+         <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Latency Statistics</h3>
+            <div className={styles.statsGrid}>
+               <StatItem 
+                  label="Current"
+                  value={device.time}
+                  unit="ms"
+                  tooltip="The latency of the most recent ping (in milliseconds)"
+               />
+               <StatItem 
+                  label="Average"
+                  value={device.avgLatency || 0}
+                  unit="ms"
+                  tooltip="Average latency calculated from recent measurements"
+               />
+               <StatItem 
+                  label="Min"
+                  value={device.minLatency || 0}
+                  unit="ms"
+                  tooltip="Lowest latency recorded in recent measurements"
+               />
+               <StatItem 
+                  label="Max"
+                  value={device.maxLatency || 0}
+                  unit="ms"
+                  tooltip="Highest latency recorded in recent measurements"
+               />
+            </div>
+         </div>
+
+         {/* Quality Metrics */}
+         <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Quality Metrics</h3>
+            <div className={styles.qualityMetrics}>
+               <div className={styles.metricRow}>
+                  <StatItem 
+                     label="Success Rate"
+                     value={device.successRate || 0}
+                     unit="%"
+                     tooltip="Percentage of successful ping responses out of total attempts"
+                  />
+                  <div className={styles.successRateBar}>
+                     <div 
+                        className={styles.successRateFill}
+                        style={{ width: `${device.successRate || 0}%` }}
+                     ></div>
+                  </div>
+               </div>
+               <StatItem 
+                  label="Packet Loss"
+                  value={device.packetLoss || 0}
+                  unit="%"
+                  tooltip="Percentage of packets lost during transmission"
+               />
+            </div>
+         </div>
+
+         {/* Connection Info */}
+         {device.alive && (
+            <div className={styles.section}>
+               <h3 className={styles.sectionTitle}>Connection Info</h3>
+               <div className={styles.connectionInfo}>
+                  <StatItem 
+                     label="Consecutive Responses"
+                     value={device.consecutiveResponses || 0}
+                     tooltip="Number of consecutive successful ping responses"
+                  />
+                  <StatItem 
+                     label="Total Checks"
+                     value={device.totalChecks || 0}
+                     tooltip="Total number of ping attempts since monitoring started"
+                  />
+               </div>
+            </div>
+         )}
+
+         {/* Footer */}
+         <div className={styles.footer}>
+            <small>Last updated: {lastUpdateTime}</small>
          </div>
       </div>
    );
