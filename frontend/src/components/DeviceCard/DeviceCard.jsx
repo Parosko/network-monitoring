@@ -1,15 +1,17 @@
 import styles from './DeviceCard.module.css';
 
-function StatItem({ label, value, unit, tooltip }) {
+function StatItem({ label, value, unit, tooltip, hasData = true }) {
+   const displayValue = hasData ? value : '-';
+   
    return (
       <div className={styles.statItem}>
          <div className={styles.statLabel} title={tooltip}>
             {label}
             <span className={styles.infoIcon}>ℹ️</span>
          </div>
-         <div className={styles.statValue}>
-            {value}
-            {unit && <span className={styles.unit}>{unit}</span>}
+         <div className={`${styles.statValue} ${!hasData ? styles.noData : ''}`}>
+            {displayValue}
+            {unit && hasData && <span className={styles.unit}>{unit}</span>}
          </div>
       </div>
    );
@@ -40,14 +42,28 @@ function DeviceCard({ device }) {
       ? new Date(device.lastCheckedTime).toLocaleTimeString()
       : 'N/A';
 
+   // Determine if we have enough samples for stable metrics
+   const hasStableMetrics = device.sampleCount >= 3;
+   const hasAnyMetrics = device.sampleCount > 0;
+
+   // Debug log
+   console.log(`[${device.name}] totalChecks: ${device.totalChecks}, sampleCount: ${device.sampleCount}, successRate: ${device.successRate}%, consecutive: ${device.consecutiveResponses}`);
+
    return (
       <div className={`${styles.card} ${styles[`status_${statusColor}`]}`}>
          {/* Header */}
          <div className={styles.header}>
             <h2 className={styles.deviceName}>{device.name}</h2>
-            <span className={`${styles.statusBadge} ${device.alive ? styles.online : styles.offline}`}>
-               {device.alive ? '🟢 Online' : '🔴 Offline'}
-            </span>
+            <div className={styles.headerRight}>
+               {device.isMonitoring && (
+                  <span className={styles.monitoringIndicator} title="System is actively monitoring this device">
+                     🟡 Monitoring
+                  </span>
+               )}
+               <span className={`${styles.statusBadge} ${device.alive ? styles.online : styles.offline}`}>
+                  {device.alive ? '🟢 Online' : '🔴 Offline'}
+               </span>
+            </div>
          </div>
 
          {/* Device Info */}
@@ -66,6 +82,13 @@ function DeviceCard({ device }) {
             )}
          </div>
 
+         {/* Data Collection Status */}
+         {device.totalChecks > 0 && device.sampleCount < 3 && (
+            <div className={styles.statusMessage}>
+               📊 Collecting data... ({device.sampleCount} of 3 samples, {device.totalChecks} total checks)
+            </div>
+         )}
+
          {/* Latency Stats Grid */}
          <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Latency Statistics</h3>
@@ -81,20 +104,28 @@ function DeviceCard({ device }) {
                   value={device.avgLatency || 0}
                   unit="ms"
                   tooltip="Average latency calculated from recent measurements"
+                  hasData={hasAnyMetrics}
                />
                <StatItem 
                   label="Min"
                   value={device.minLatency || 0}
                   unit="ms"
                   tooltip="Lowest latency recorded in recent measurements"
+                  hasData={hasStableMetrics}
                />
                <StatItem 
                   label="Max"
                   value={device.maxLatency || 0}
                   unit="ms"
                   tooltip="Highest latency recorded in recent measurements"
+                  hasData={hasStableMetrics}
                />
             </div>
+            {!hasStableMetrics && device.totalChecks > 0 && (
+               <small className={styles.metricNote}>
+                  Min/Max will stabilize after 3+ measurements
+               </small>
+            )}
          </div>
 
          {/* Quality Metrics */}
@@ -124,28 +155,45 @@ function DeviceCard({ device }) {
             </div>
          </div>
 
-         {/* Connection Info */}
-         {device.alive && (
-            <div className={styles.section}>
-               <h3 className={styles.sectionTitle}>Connection Info</h3>
-               <div className={styles.connectionInfo}>
+         {/* Connection Info - Always Show */}
+         <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Connection Info</h3>
+            <div className={styles.connectionInfo}>
+               <StatItem 
+                  label="Consecutive Responses"
+                  value={device.consecutiveResponses || 0}
+                  tooltip="Number of consecutive successful ping responses (resets if device goes offline)"
+               />
+               <StatItem 
+                  label="Total Checks"
+                  value={device.totalChecks || 0}
+                  tooltip="Total number of ping attempts since monitoring started"
+               />
+               {device.sampleCount > 0 && (
                   <StatItem 
-                     label="Consecutive Responses"
-                     value={device.consecutiveResponses || 0}
-                     tooltip="Number of consecutive successful ping responses"
+                     label="Data Samples"
+                     value={device.sampleCount || 0}
+                     tooltip="Number of successful latency measurements collected (max 100)"
                   />
+               )}
+               {device.successCount !== undefined && (
                   <StatItem 
-                     label="Total Checks"
-                     value={device.totalChecks || 0}
-                     tooltip="Total number of ping attempts since monitoring started"
+                     label="Successful Pings"
+                     value={device.successCount || 0}
+                     tooltip="Total number of successful ping responses"
                   />
-               </div>
+               )}
             </div>
-         )}
+         </div>
 
          {/* Footer */}
          <div className={styles.footer}>
             <small>Last updated: {lastUpdateTime}</small>
+            {device.isMonitoring && (
+               <small className={styles.monitoringNote}>
+                  Pinging every 5 seconds automatically
+               </small>
+            )}
          </div>
       </div>
    );

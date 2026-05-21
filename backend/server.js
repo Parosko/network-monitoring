@@ -69,43 +69,73 @@ async function monitorDevices() {
       initializeMetrics(device.ip);
       const metrics = deviceMetrics[device.ip];
 
-      const pingResult = await ping.promise.probe(device.ip);
+      try {
+         const pingResult = await ping.promise.probe(device.ip);
 
-      // Update metrics
-      metrics.totalChecks++;
-      metrics.lastCheckedTime = new Date();
+         // Update metrics
+         metrics.totalChecks++;
+         metrics.lastCheckedTime = new Date();
 
-      if (pingResult.alive) {
-         metrics.successCount++;
-         metrics.consecutiveResponses++;
-         // Keep only last 100 samples
-         if (metrics.latencySamples.length >= 100) {
-            metrics.latencySamples.shift();
+         if (pingResult.alive) {
+            metrics.successCount++;
+            metrics.consecutiveResponses++;
+            // Keep only last 100 samples
+            if (metrics.latencySamples.length >= 100) {
+               metrics.latencySamples.shift();
+            }
+            metrics.latencySamples.push(pingResult.time);
+         } else {
+            metrics.consecutiveResponses = 0;
          }
-         metrics.latencySamples.push(pingResult.time);
-      } else {
+
+         const calculatedMetrics = calculateMetrics(device.ip);
+
+         results.push({
+            name: device.name,
+            ip: device.ip,
+            type: device.type,
+            alive: pingResult.alive,
+            time: pingResult.time || 0,
+            packetLoss: pingResult.packetLoss || 0,
+            ...calculatedMetrics,
+            consecutiveResponses: metrics.consecutiveResponses,
+            totalChecks: metrics.totalChecks,
+            lastCheckedTime: metrics.lastCheckedTime,
+            sampleCount: metrics.latencySamples.length,
+            successCount: metrics.successCount,
+            isMonitoring: true
+         });
+
+         console.log(`[${new Date().toLocaleTimeString()}] ✓ ${device.name} (${device.ip}): ${pingResult.alive ? 'ONLINE' : 'OFFLINE'} | Checks: ${metrics.totalChecks} | Success Rate: ${calculatedMetrics.successRate}% | Samples: ${metrics.latencySamples.length}`);
+      } catch (err) {
+         console.error(`Error pinging ${device.name} (${device.ip}):`, err.message);
+         metrics.totalChecks++;
+         metrics.lastCheckedTime = new Date();
          metrics.consecutiveResponses = 0;
+
+         const calculatedMetrics = calculateMetrics(device.ip);
+
+         results.push({
+            name: device.name,
+            ip: device.ip,
+            type: device.type,
+            alive: false,
+            time: 0,
+            packetLoss: 100,
+            ...calculatedMetrics,
+            consecutiveResponses: 0,
+            totalChecks: metrics.totalChecks,
+            lastCheckedTime: metrics.lastCheckedTime,
+            sampleCount: metrics.latencySamples.length,
+            successCount: metrics.successCount,
+            isMonitoring: true
+         });
       }
-
-      const calculatedMetrics = calculateMetrics(device.ip);
-
-      results.push({
-         name: device.name,
-         ip: device.ip,
-         type: device.type,
-         alive: pingResult.alive,
-         time: pingResult.time,
-         packetLoss: pingResult.packetLoss,
-         ...calculatedMetrics,
-         consecutiveResponses: metrics.consecutiveResponses,
-         totalChecks: metrics.totalChecks,
-         lastCheckedTime: metrics.lastCheckedTime
-      });
    }
 
    monitoringResults = results;
 
-   console.log('Monitoring updated');
+   console.log(`Monitoring updated - ${results.length} device(s) checked\n`);
 }
 
 async function testDatabase() {
@@ -153,6 +183,14 @@ app.get('/ping', (req, res) => {
 
    res.json(monitoringResults);
 
+});
+
+app.get('/debug/metrics', (req, res) => {
+   res.json({
+      monitoringResults,
+      deviceMetrics,
+      timestamp: new Date().toLocaleTimeString()
+   });
 });
 
 app.listen(3000, () => {
