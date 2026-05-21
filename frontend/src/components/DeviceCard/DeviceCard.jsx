@@ -6,9 +6,19 @@ function StatItem({ label, value, unit, tooltip, hasData = true }) {
 
    return (
       <div className={styles.statItem}>
-         <span className={styles.statLabel} title={tooltip}>
+         <span className={styles.statLabel}>
             {label}
-            {tooltip && <IconInfo className={styles.infoIcon} />}
+            {tooltip && (
+               <span
+                  className={styles.infoWrap}
+                  data-tooltip={tooltip}
+                  tabIndex={0}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+               >
+                  <IconInfo className={styles.infoIcon} />
+               </span>
+            )}
          </span>
          <span className={`${styles.statValue} ${!hasData ? styles.noData : ''}`}>
             {displayValue}
@@ -20,7 +30,7 @@ function StatItem({ label, value, unit, tooltip, hasData = true }) {
 
 function StatusBadge({ alive }) {
    return (
-      <span className={styles.statusBadge}>
+      <span className={`${styles.statusBadge} ${alive ? '' : styles.statusBadgeOffline}`}>
          <IconDot className={`${styles.statusDot} ${alive ? styles.dotOnline : styles.dotOffline}`} />
          {alive ? 'Online' : 'Offline'}
       </span>
@@ -44,7 +54,7 @@ function DeviceCard({ device, onSelect }) {
 
    return (
       <div
-         className={`${styles.card} ${onSelect ? styles.clickable : ''}`}
+         className={`${styles.card} ${!device.alive ? styles.cardOffline : ''} ${onSelect ? styles.clickable : ''}`}
          onClick={() => onSelect?.(device)}
          onKeyDown={handleKeyDown}
          role={onSelect ? 'button' : undefined}

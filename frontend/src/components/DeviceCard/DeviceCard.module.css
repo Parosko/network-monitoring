@@ -3,21 +3,37 @@
    border: 1px solid var(--color-border);
    border-radius: 8px;
    padding: 16px;
-   transition: border-color 0.15s, box-shadow 0.15s;
+   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
-.card:hover {
-   border-color: #d4d4d8;
-   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+.cardOffline {
+   border-color: #fca5a5;
+   background: #fffbfb;
 }
 
 .clickable {
    cursor: pointer;
 }
 
+.clickable:hover {
+   border-color: #93c5fd;
+   background: #f8fafc;
+   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.clickable.cardOffline:hover {
+   border-color: #f87171;
+   background: #fff5f5;
+   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+}
+
 .clickable:focus-visible {
    outline: 2px solid var(--color-primary);
    outline-offset: 2px;
+}
+
+.cardOffline .deviceName {
+   color: #991b1b;
 }
 
 .header {
@@ -90,6 +106,12 @@
    color: var(--color-danger);
 }
 
+.statusBadgeOffline {
+   border-color: #fecaca;
+   background: #fef2f2;
+   color: #b91c1c;
+}
+
 .meta {
    display: grid;
    grid-template-columns: 1fr 1fr;
@@ -152,13 +174,55 @@
    font-size: 0.75rem;
    font-weight: 400;
    color: var(--color-muted);
+}
+
+.infoWrap {
+   position: relative;
+   display: inline-flex;
+   align-items: center;
    cursor: help;
+   color: #a1a1aa;
+}
+
+.infoWrap:hover,
+.infoWrap:focus-visible {
+   color: var(--color-muted);
+}
+
+.infoWrap::after {
+   content: attr(data-tooltip);
+   position: absolute;
+   bottom: calc(100% + 6px);
+   left: 50%;
+   transform: translateX(-50%);
+   width: max-content;
+   max-width: 200px;
+   padding: 6px 8px;
+   font-size: 0.6875rem;
+   font-weight: 400;
+   line-height: 1.35;
+   color: #fafafa;
+   background: #27272a;
+   border-radius: 4px;
+   white-space: normal;
+   text-align: center;
+   pointer-events: none;
+   opacity: 0;
+   visibility: hidden;
+   transition: opacity 0.1s ease, visibility 0.1s ease;
+   z-index: 20;
+}
+
+.infoWrap:hover::after,
+.infoWrap:focus-visible::after {
+   opacity: 1;
+   visibility: visible;
+   transition-delay: 0s;
 }
 
 .infoIcon {
    width: 12px;
    height: 12px;
-   color: #a1a1aa;
    flex-shrink: 0;
 }
 
@@ -231,6 +295,10 @@
 
 .viewChart {
    color: var(--color-primary);
+}
+
+.clickable:hover .viewChart {
+   text-decoration: underline;
 }
 
 @media (max-width: 640px) {
